@@ -4,6 +4,8 @@ import 'winston-daily-rotate-file';
 
 @Injectable()
 export class CustomLogger implements LoggerService {
+  static readonly DEFAULT_LOGGING_LEVEL = 'debug';
+
   private loggers: Map<string, Logger> = new Map();
   private defaultLogger: Logger;
   
@@ -23,30 +25,7 @@ constructor(context?: string) {
     this.originalContext = context;
   }
 
-  this.defaultLogger = createLogger({
-    level: "debug",
-    format: format.combine(
-      format.timestamp({ format: "YYYY-MM-DD HH:mm:ss.SSS" }),
-      format.errors({ stack: true }),
-      this.log4jFormat()
-    ),
-    transports: [
-      new transports.DailyRotateFile({
-        filename: "logs/default-%DATE%.log",
-        datePattern: "YYYY-MM-DD",
-        maxFiles: "30d",
-        zippedArchive: true,
-      }),
-      new transports.Console({
-        format: format.combine(
-          format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
-          format.errors({ stack: true }),
-          this.log4jFormat(),
-          format.colorize({ all: true }),
-        )
-      })
-    ],
-  });
+  this.defaultLogger = this.loggerFactory("default");
 }
 
 private getLoggerForContext(context?: string): Logger {
@@ -55,8 +34,17 @@ private getLoggerForContext(context?: string): Logger {
   const normalizedContext = context.toLowerCase().replace(/[^a-z0-9]/g, "-");
 
   if (!this.loggers.has(normalizedContext)) {
-    const logger = createLogger({
-      level: "debug",
+    const logger = this.loggerFactory(normalizedContext);
+
+    this.loggers.set(normalizedContext, logger);
+  }
+
+  return this.loggers.get(normalizedContext)!;
+}
+
+private loggerFactory(normalizedCtx: string): Logger {
+  return createLogger({
+      level: CustomLogger.DEFAULT_LOGGING_LEVEL,
       format: format.combine(
         format.timestamp({ format: "YYYY-MM-DD HH:mm:ss.SSS" }),
         format.errors({ stack: true }),
@@ -64,7 +52,7 @@ private getLoggerForContext(context?: string): Logger {
       ),
       transports: [
         new transports.DailyRotateFile({
-          filename: `logs/${normalizedContext}-%DATE%.log`,
+          filename: `logs/${normalizedCtx}-%DATE%.log`,
           datePattern: "YYYY-MM-DD",
           maxFiles: "30d",
           zippedArchive: true,
@@ -79,11 +67,6 @@ private getLoggerForContext(context?: string): Logger {
       })
       ],
     });
-
-    this.loggers.set(normalizedContext, logger);
-  }
-
-  return this.loggers.get(normalizedContext)!;
 }
 
 private log4jFormat() {
