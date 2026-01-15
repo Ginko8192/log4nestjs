@@ -1,0 +1,39 @@
+{
+  "name": "log4nestjs",
+  "version": "1.0.0",
+  "description": "A Log4j-style logger service for NestJS using Winston with daily rotating files",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "nestjs",
+    "logger",
+    "winston",
+    "log4j",
+    "logging"
+  ],
+  "author": "Federico Ranieri",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ginko8192/log4nestjs.git"
+  },
+  "peerDependencies": {
+    "@nestjs/common": ">=8.0.0",
+    "winston": ">=3.0.0",
+    "winston-daily-rotate-file": ">=4.0.0"
+  },
+  "devDependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "winston": "^3.11.0",
+    "winston-daily-rotate-file": "^5.0.0"
+  }
+}
